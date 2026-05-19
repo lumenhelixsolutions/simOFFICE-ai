@@ -1,0 +1,50 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">SimOffice hero banner</title>
+  <desc id="desc">A dark command center marketing banner for SimOffice.</desc>
+  <rect width="1200" height="630" fill="#080A18"/>
+  <radialGradient id="g" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(850 160) rotate(132) scale(720 780)">
+    <stop stop-color="#ff6b6b" stop-opacity="0.45"/>
+    <stop offset="0.42" stop-color="#6d5dfc" stop-opacity="0.22"/>
+    <stop offset="1" stop-color="#080A18" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <g opacity="0.48">
+    <path d="M0 512 L240 374 L485 512 L728 374 L970 512 L1200 380" stroke="#2A315A" stroke-width="2"/>
+    <path d="M0 570 L240 432 L485 570 L728 432 L970 570 L1200 438" stroke="#2A315A" stroke-width="2"/>
+    <path d="M240 374 V570 M485 512 V610 M728 374 V570 M970 512 V610" stroke="#23284A" stroke-width="2"/>
+  </g>
+  <g transform="translate(720 280)">
+    <rect x="0" y="90" width="170" height="94" rx="16" fill="#151A34" stroke="#6d5dfc" stroke-opacity="0.5"/>
+    <rect x="25" y="46" width="120" height="72" rx="12" fill="#222B52" stroke="#72E0A8" stroke-opacity="0.5"/>
+    <rect x="42" y="60" width="86" height="10" rx="5" fill="#72E0A8" opacity="0.8"/>
+    <rect x="42" y="82" width="60" height="8" rx="4" fill="#FF6B6B" opacity="0.9"/>
+    <rect x="55" y="184" width="58" height="80" rx="16" fill="#FF6B6B"/>
+    <circle cx="84" cy="150" r="34" fill="#FFE7AA"/>
+    <rect x="52" y="215" width="62" height="20" rx="10" fill="#FFAF5F"/>
+  </g>
+  <g transform="translate(900 340)" opacity="0.9">
+    <rect x="0" y="64" width="155" height="82" rx="16" fill="#151A34" stroke="#6d5dfc" stroke-opacity="0.45"/>
+    <rect x="24" y="25" width="104" height="60" rx="10" fill="#222B52" stroke="#72E0A8" stroke-opacity="0.5"/>
+    <rect x="42" y="146" width="52" height="72" rx="14" fill="#51A7FF"/>
+    <circle cx="68" cy="116" r="30" fill="#FFE7AA"/>
+  </g>
+  <g transform="translate(660 105)">
+    <rect x="0" y="0" width="390" height="62" rx="20" fill="#10152B" stroke="#25315F"/>
+    <circle cx="34" cy="31" r="8" fill="#72E0A8"/>
+    <text x="54" y="38" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#DDE7FF">CREWAI CONNECTED</text>
+    <rect x="247" y="17" width="112" height="28" rx="14" fill="#FF6B6B" fill-opacity="0.16"/>
+    <text x="270" y="37" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#FF8B8B">LIVE</text>
+  </g>
+  <text x="92" y="170" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="82" font-weight="900" fill="#F4F7FF">SimOffice</text>
+  <text x="96" y="225" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="28" font-weight="700" fill="#FF8B8B">The 3D command center for AI agent teams.</text>
+  <text x="98" y="290" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="22" fill="#B8C2E0">Manage roles, skills, tools, memory, workflows, and workstations</text>
+  <text x="98" y="326" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="22" fill="#B8C2E0">inside a live 3D operations floor.</text>
+  <g transform="translate(96 390)">
+    <rect x="0" y="0" width="174" height="44" rx="22" fill="#FF6B6B"/>
+    <text x="26" y="29" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="800" fill="#11162A">Open Source</text>
+    <rect x="194" y="0" width="210" height="44" rx="22" fill="#111832" stroke="#33406F"/>
+    <text x="220" y="29" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="800" fill="#DDE7FF">Commercial Grade</text>
+    <rect x="424" y="0" width="166" height="44" rx="22" fill="#111832" stroke="#33406F"/>
+    <text x="451" y="29" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="800" fill="#72E0A8">No Fake Mode</text>
+  </g>
+</svg>

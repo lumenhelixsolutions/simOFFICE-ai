@@ -1,0 +1,26 @@
+{
+  "name": "simoffice",
+  "version": "0.7.2",
+  "private": true,
+  "description": "SimOffice — a 3D command center for managing AI agent teams, skills, tools, memory, workflows, and office stations.",
+  "scripts": {
+    "client:dev": "npm --prefix client run dev -- --host 0.0.0.0",
+    "client:build": "npm --prefix client run build",
+    "client:preview": "npm --prefix client run preview -- --host 0.0.0.0",
+    "backend:dev": "cd backend && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8080",
+    "backend:check": "python -m py_compile backend/main.py backend/crew.py",
+    "check": "npm run backend:check && npm run client:build"
+  },
+  "keywords": [
+    "ai-agents",
+    "agentic-ui",
+    "3d-dashboard",
+    "crewai",
+    "react-three-fiber",
+    "simoffice",
+    "workflow-automation",
+    "open-source-ai"
+  ],
+  "author": "Christopher Gordon Phillips / Lumen Helix Solutions",
+  "license": "MIT"
+}

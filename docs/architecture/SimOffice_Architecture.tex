@@ -1,0 +1,604 @@
+\documentclass[11pt,letterpaper]{article}
+
+% ── Packages ──────────────────────────────────────────────────
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tcolorbox}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{float}
+
+% ── Colors ────────────────────────────────────────────────────
+\definecolor{accent}{HTML}{E94560}
+\definecolor{darkbg}{HTML}{0D0D1A}
+\definecolor{muted}{HTML}{4A4A6A}
+\definecolor{link}{HTML}{4090E0}
+
+% ── Hyperref config ───────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  urlcolor=link,
+  citecolor=muted,
+  pdftitle={SimOffice: Development Architecture},
+  pdfauthor={Christopher Gordon Phillips},
+}
+
+% ── Headers ───────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{muted}{SimOffice Development Architecture}}
+\fancyhead[R]{\small\textcolor{muted}{LumenHelix Solutions}}
+\fancyfoot[C]{\small\textcolor{muted}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Section styling ───────────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{accent}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\large\bfseries}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{muted}}
+  {\thesubsubsection}{1em}{}
+
+% ── Custom environments ──────────────────────────────────────
+\newtcolorbox{designbox}[1][]{
+  colback=accent!3,
+  colframe=accent!40,
+  fonttitle=\bfseries,
+  title={#1},
+  boxrule=0.5pt,
+  arc=3pt,
+}
+
+\newtcolorbox{archbox}[1][]{
+  colback=blue!2,
+  colframe=blue!25,
+  fonttitle=\bfseries,
+  title={#1},
+  boxrule=0.5pt,
+  arc=3pt,
+}
+
+\newtcolorbox{notebox}{
+  colback=black!2,
+  colframe=black!15,
+  boxrule=0.3pt,
+  arc=2pt,
+}
+
+% ── Title ─────────────────────────────────────────────────────
+\title{
+  \vspace{-1cm}
+  {\Huge\bfseries\textcolor{accent}{SimOffice}}\\[6pt]
+  {\Large Development Architecture \& Technical Specification}\\[12pt]
+  {\normalsize Version 0.3 --- May 2026}
+}
+\author{
+  Christopher Gordon Phillips\\
+  {\small LumenHelix Solutions}\\
+  {\small\texttt{chris@oiq.to} · \texttt{lumenhelix.com}}
+}
+\date{}
+
+% ══════════════════════════════════════════════════════════════
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+% ── Abstract ──────────────────────────────────────────────────
+\begin{abstract}
+\noindent
+SimOffice is an isometric agent workspace simulator that borrows interaction paradigms from classic simulation and strategy games---particularly \emph{The Sims}, early \emph{Grand Theft Auto}, and \emph{StarCraft}---to create an intuitive, visual interface for spawning, configuring, and observing autonomous AI agents in a virtual office environment. Agents are powered by multi-model LLM backends (Claude, GPT-4o, Llama, Mistral) with dynamic task-based routing managed by a senior agent. The system features a drag-and-drop component library where placing objects grants agents corresponding capabilities, prefabricated environment templates that are fully deconstructable and remixable, and a community sharing layer for collaborative world-building. This document defines the complete development architecture, from rendering pipeline through agent cognition to token-efficiency integration via the OmniCube compression framework.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+\section{Vision \& Motivation}
+% ══════════════════════════════════════════════════════════════
+
+The current landscape of AI agent orchestration tools falls into two categories: enterprise backends that automate tasks invisibly (Moveworks, Ema, Salesforce Agentforce), and academic simulations that lack visual charm or accessibility (Mesa, AnyLogic). Neither makes agent behavior \emph{watchable}, \emph{shareable}, or \emph{enjoyable}.
+
+SimOffice occupies the gap between these worlds. It treats agent orchestration as a \emph{spatial, visual, social experience}---the same paradigm that made The Sims one of the best-selling game franchises in history.
+
+\begin{designbox}[Core Thesis]
+Game interfaces evolved over decades to make complex systems legible and interactive. AI agent orchestration is a complex system. Therefore, the most intuitive agent interface is a game-inspired one.
+\end{designbox}
+
+\subsection{Design Influences}
+
+Three game design lineages converge in SimOffice:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{The Sims} --- Character creation as agent parameterization. The ``build mode / live mode'' duality. Object placement as capability granting. The emotional legibility of watching characters move through space with purpose.
+
+  \item \textbf{Grand Theft Auto 1/2} --- The isometric (45-degree) camera angle that provides spatial depth without 3D rendering overhead. Readable character movement in a 2D-projected space. The sense of a living, self-directed world.
+
+  \item \textbf{StarCraft / RTS Games} --- Unit spawning as agent instantiation. Building construction as capability deployment. Resource management as token-cost optimization. The ``fog of war'' parallel to agent information boundaries.
+\end{enumerate}
+
+\noindent
+The AgentCraft project (2025--2026) demonstrated that RTS interfaces work for agent orchestration. Stanford's Generative Agents paper (Park et al., 2023) proved that LLM-powered agents can produce believable autonomous behavior in a Sims-like sandbox with memory streams and reflection architectures. SimOffice synthesizes both insights with a focus on \emph{workplace productivity}, \emph{community sharing}, and \emph{multi-model cost optimization}.
+
+
+% ══════════════════════════════════════════════════════════════
+\section{System Architecture Overview}
+% ══════════════════════════════════════════════════════════════
+
+SimOffice comprises five architectural layers:
+
+\begin{archbox}[Layer Stack]
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{Rendering Layer} --- Isometric Canvas2D engine with gradient shading, drop shadows, glow effects, and ambient animation.
+  \item \textbf{Environment Layer} --- Spatial model (grid, rooms, furniture, capability objects), physics-free navigation, and the component library.
+  \item \textbf{Agent Layer} --- Agent definitions, role archetypes, task assignment, movement state, and personality/behavior parameters.
+  \item \textbf{Cognition Layer} --- Multi-model LLM routing, system prompts, memory streams, inter-agent communication, and the senior-agent task router.
+  \item \textbf{Efficiency Layer} --- Token cost tracking (CFO agent), local model fallback, OmniCube compression integration, and community-shared optimization profiles.
+\end{enumerate}
+\end{archbox}
+
+\subsection{Data Flow}
+
+The runtime data flow follows a perception--decision--action cycle:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Environment tick} advances the simulation clock. The speed multiplier ($1\times$, $2\times$, $4\times$) scales the tick rate.
+  \item \textbf{Task timer} fires for each active agent. When an agent's timer expires, the \textbf{Senior Agent} (CEO) selects a task from the agent's task pool, considering CFO cost advisories.
+  \item \textbf{Movement} triggers: the agent walks to the spatial location associated with the task (desk, meeting room, server rack, filing cabinet).
+  \item \textbf{LLM call} fires asynchronously. The agent's status transitions to ``thinking.'' The routing layer selects the appropriate model based on task type, agent assignment, and cost constraints.
+  \item \textbf{Response} arrives and is displayed as a speech bubble, logged to the task feed, and stored in the agent's memory stream (future version).
+  \item \textbf{State update} propagates: agent panel refreshes, CFO tracks token cost delta, rendering layer updates agent position and status indicator.
+\end{enumerate}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Rendering Engine}
+% ══════════════════════════════════════════════════════════════
+
+\subsection{Isometric Projection}
+
+SimOffice uses a standard 2:1 isometric projection with tile dimensions $T_w = 64$\,px, $T_h = 32$\,px. The forward transform from grid coordinates $(g_x, g_y)$ to screen coordinates $(s_x, s_y)$ at height $h$ above the ground plane is:
+
+\begin{align}
+  s_x &= O_x + (g_x - g_y) \cdot \frac{T_w}{2} \\
+  s_y &= O_y + (g_x + g_y) \cdot \frac{T_h}{2} - h
+\end{align}
+
+\noindent
+where $(O_x, O_y)$ is the screen-space origin (typically the center-top of the viewport). The inverse transform for hit-testing (click $\to$ grid cell) is:
+
+\begin{align}
+  g_x &= \left\lfloor \frac{\Delta x}{T_w} + \frac{\Delta y}{T_h} \right\rfloor \cdot \frac{1}{2} \\
+  g_y &= \left\lfloor \frac{\Delta y}{T_h} - \frac{\Delta x}{T_w} \right\rfloor \cdot \frac{1}{2}
+\end{align}
+
+\noindent
+where $\Delta x = s_x - O_x$, $\Delta y = s_y - O_y$.
+
+\subsection{Rendering Pipeline}
+
+The v0.3 renderer uses raw HTML5 Canvas 2D (no game engine dependency) with HiDPI scaling via \texttt{devicePixelRatio}. The draw order follows the painter's algorithm:
+
+\begin{enumerate}[leftmargin=2em]
+  \item Clear canvas, fill background.
+  \item Draw floor tiles (back-to-front by $g_x + g_y$), with carpet zone differentiation and window-light overlay.
+  \item Draw walls: left wall (y-facing panels with luminance falloff), back wall (x-facing panels with window sky gradients and mullion details), baseboard lines, and wall-top edge highlights.
+  \item Collect all furniture items and active agents into a single depth-sorted array ($g_x + g_y$ ascending).
+  \item For each object: draw drop shadow (dark ellipse at base), then draw the object. Furniture uses gradient-shaded box faces with edge highlights. Desks additionally render monitors with animated screen glow and keyboard silhouettes. Server racks render blinking LED arrays. Plants render leaf clusters.
+  \item Agents render with gradient-shaded torsos, skin-tone heads, hair detail, breathing idle animation ($\sin$ bob), and glowing status indicator dots.
+\end{enumerate}
+
+\subsection{Visual Design Language}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Element} & \textbf{Treatment} & \textbf{Technique} \\
+\midrule
+Floor tiles       & Alternating warm wood tones, carpet zone in blue-gray & Flat fill + grid stroke \\
+Furniture faces   & Linear gradient (light at top, dark at bottom)         & \texttt{createLinearGradient} \\
+Drop shadows      & Soft dark ellipses under all objects                   & \texttt{globalAlpha} + \texttt{ellipse} \\
+Monitor screens   & Animated cyan glow with $\sin$-based flicker           & \texttt{shadowBlur} + composite \\
+Server LEDs       & Phase-offset $\sin$ blink pattern (green + red)        & Per-frame redraw \\
+Window light      & Low-opacity warm overlay on floor tiles near window     & \texttt{globalAlpha} overlay \\
+Agent bodies      & Gradient-shaded jacket, rounded proportions            & \texttt{roundRect} + gradient \\
+Agent status      & Glowing colored dot with \texttt{shadowBlur} halo      & Canvas shadow API \\
+\bottomrule
+\end{tabularx}
+\caption{Rendering techniques by visual element.}
+\end{table}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Environment System}
+% ══════════════════════════════════════════════════════════════
+
+\subsection{The Office Grid}
+
+The base environment is a $10 \times 8$ isometric tile grid. Walls enclose the left (x=0) and back (y=0) edges. Windows span tiles $x \in [3,6]$ on the back wall, providing a sky gradient with mullion details and casting a warm light overlay on nearby floor tiles.
+
+The grid supports:
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Floor zones}: carpet (meeting area), wood (work area), with distinct tile colors per zone.
+  \item \textbf{Furniture placement}: any grid cell can receive a furniture item of arbitrary tile footprint ($w \times d$).
+  \item \textbf{Agent stations}: each agent has a designated desk position (grid coordinate pair). Agents navigate to task-specific destinations and return to their station when idle.
+\end{itemize}
+
+\subsection{Sandbox Mode}
+
+Sandbox mode presents the office grid with two side panels:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Left panel (Furnish)}: A component palette listing all available furniture items. Clicking an item selects it; clicking a floor tile places it. A hover-highlight (red diamond outline) previews the placement cell.
+  \item \textbf{Right panel (Office)}: Displays office metadata (name, type, item count), agent activation toggles, and the ``GO LIVE'' transition button.
+\end{itemize}
+
+All prefab furniture is visible in Sandbox mode and can be rearranged or supplemented. The Sandbox is the deconstructable workspace described in the design philosophy---every prefab can be pulled apart, modified, and reassembled.
+
+\subsection{Live Mode}
+
+Live mode activates agents and starts the simulation clock. The interface presents:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Top bar}: Office name, simulation date/time, API status badge, settings and sandbox return buttons.
+  \item \textbf{Left panel (Agents)}: Active agent cards showing name, role, current task, status indicator (working / meeting / moving / thinking), and assigned model tag.
+  \item \textbf{Right panel (Task Feed)}: Scrollable chronological log of agent LLM outputs---who said it, what task triggered it, timestamp, and the full response text.
+  \item \textbf{Bottom bar}: Time controls (Pause / $1\times$ / $2\times$ / $4\times$), simulation clock, and latest task assignment ticker.
+\end{itemize}
+
+\subsection{Onboarding Flow}
+
+The onboarding is a conversational chatbot hybrid that combines natural-language prompts with quick-select option buttons:
+
+\begin{enumerate}[leftmargin=2em]
+  \item ``What kind of office are you building?'' --- Guided templates (Law Firm, Tech Startup, Design Studio, etc.) \emph{or} open-ended ``Tell me what I need.''
+  \item ``What do you want to call it?'' --- Free-text input.
+  \item ``How big is your team?'' --- Size bracket selection.
+  \item ``What's your primary focus?'' --- Product dev, client work, research, operations.
+\end{enumerate}
+
+After onboarding, the system sets the office name/type and transitions to Sandbox mode. Future versions will use onboarding answers to pre-activate contextually relevant agents and suggest appropriate environment templates.
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Component Library: Furniture as Capability}
+% ══════════════════════════════════════════════════════════════
+
+A central design principle of SimOffice is that \textbf{placing an object in an agent's workspace grants that agent access to the object's capability}. This decouples capability management from agent configuration---you don't set permissions in a menu; you drag a phone onto a desk.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Object} & \textbf{Palette ID} & \textbf{Capability Unlocked} \\
+\midrule
+Desk              & \texttt{desk}    & Workspace anchor; required for agent station assignment \\
+Computer/Monitor  & \texttt{monitor} & Network access, LLM API calls, web browsing \\
+Phone             & \texttt{phone}   & Voice call simulation, external communication \\
+Mailbox           & \texttt{mail}    & Email send/receive, notification dispatch \\
+Filing Cabinet    & \texttt{cab}     & Document storage, retrieval, archival \\
+Server Rack       & \texttt{srv}     & Data processing, compute jobs, pipeline execution \\
+Meeting Table     & \texttt{tbl}     & Multi-agent synchronous collaboration \\
+Whiteboard        & \texttt{board}   & Shared ideation, planning artifact creation \\
+Printer           & \texttt{prn}     & Document output, report generation \\
+Plant             & \texttt{plnt}    & Aesthetic only (morale modifier in future versions) \\
+\bottomrule
+\end{tabularx}
+\caption{Component library: objects and their granted capabilities.}
+\end{table}
+
+\begin{designbox}[Design Principle: Object Semantics]
+The component library is \emph{not} decorative. Each object is a first-class capability token. When an agent needs to send an email, the system checks whether a mailbox object exists within the agent's accessible workspace. If not, the capability is unavailable. This creates a legible, spatial model of agent permissions.
+\end{designbox}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Agent Architecture}
+% ══════════════════════════════════════════════════════════════
+
+\subsection{Prefab Agent Roster}
+
+The beta ships with a C-suite starter cast plus support roles. All agents start \emph{dormant} and activate contextually during onboarding or manually in Sandbox mode.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lllXl}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Model} & \textbf{Primary Domain} & \textbf{Status} \\
+\midrule
+CEO   & Alex Chen    & Claude Sonnet & Strategy, cross-team alignment, decision-making      & Active (v0.3) \\
+CTO   & Marcus Webb  & Claude Opus   & Architecture, code review, technical decisions         & Active (v0.3) \\
+CFO   & Priya Singh  & GPT-4o-mini   & Token cost tracking, budget analysis, model economics  & Active (v0.3) \\
+CIO   & James Torres & Llama (local) & Infrastructure, data pipelines, system monitoring      & Active (v0.3) \\
+Admin & Sam Riley    & Mistral (local) & Scheduling, filing, coordination, logistics           & Active (v0.3) \\
+\midrule
+HR       & ---      & TBD & Recruitment, onboarding, policy compliance        & Planned \\
+Trainer  & ---      & TBD & Agent skill development, prompt optimization      & Planned \\
+Analyzer & ---      & TBD & Data analysis, report generation, pattern detection & Planned \\
+\bottomrule
+\end{tabularx}
+\caption{Agent roster with model assignments and development status.}
+\end{table}
+
+\subsection{Agent State Model}
+
+Each agent maintains the following runtime state:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Position} $(s_x, s_y)$: Current screen coordinates (updated per frame during movement).
+  \item \textbf{Target} $(t_x, t_y)$: Destination screen coordinates for current movement.
+  \item \textbf{Status}: One of \texttt{work} (at desk), \texttt{meet} (at meeting table), \texttt{move} (in transit), \texttt{think} (awaiting LLM response).
+  \item \textbf{Task}: Current task label (e.g., ``Architecture review,'' ``Token cost analysis'').
+  \item \textbf{Task timer}: Countdown until next task assignment (randomized interval, 350--800 ticks).
+  \item \textbf{LLM pending}: Boolean flag preventing concurrent API calls per agent.
+  \item \textbf{Last output}: Most recent LLM response text.
+  \item \textbf{Model assignment}: Which LLM provider/model handles this agent's cognition.
+\end{itemize}
+
+\subsection{Task Assignment Flow}
+
+\begin{enumerate}[leftmargin=2em]
+  \item Agent's task timer expires (and no LLM call is in flight).
+  \item A task is selected from the agent's task pool (uniform random in v0.3; senior-agent-routed in future).
+  \item Movement target is set to the task's spatial destination. Status transitions to the task's type (work/meet/move).
+  \item An asynchronous LLM call fires:
+    \begin{enumerate}
+      \item Status temporarily transitions to \texttt{think}; speech bubble shows ``\ldots''
+      \item The LLM receives a role-specific system prompt and a task-contextualized user message.
+      \item On response: speech bubble displays the text; task feed logs it; status reverts.
+    \end{enumerate}
+  \item A 4-second cooldown prevents successive LLM calls for the same agent.
+\end{enumerate}
+
+\subsection{Contextual Activation \& Onboarding Guidance}
+
+Agents are \emph{dormant by default}. As users build their office environment in Sandbox mode, the system suggests activating relevant agents:
+
+\begin{notebox}
+\textbf{Example}: Adding a server rack triggers: ``Your office now has compute infrastructure. Consider activating James Torres (CIO) to manage it.''
+\end{notebox}
+
+This progressive disclosure prevents information overload while teaching users the system's full capabilities through doing.
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Multi-Model Routing Architecture}
+% ══════════════════════════════════════════════════════════════
+
+\subsection{Supported Providers}
+
+SimOffice is model-agnostic by design. The v0.3 beta supports:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{Provider} & \textbf{Models} & \textbf{Access} & \textbf{Notes} \\
+\midrule
+Anthropic & Claude Sonnet 4.6, Opus 4.6 & API key          & Primary models for strategic/technical agents \\
+OpenAI    & GPT-4o-mini                  & API key          & Cost-efficient for analytical tasks \\
+Meta      & Llama 3.2                    & Ollama (local)   & Zero-cost inference for infrastructure tasks \\
+Mistral   & Mistral                      & Ollama (local)   & Zero-cost inference for administrative tasks \\
+xAI       & Grok                         & API key (planned) & Planned for future integration \\
+Google    & Gemini                       & API key (planned) & Planned for future integration \\
+\bottomrule
+\end{tabularx}
+\caption{Supported LLM providers and access methods.}
+\end{table}
+
+\subsection{Routing Strategy: Hybrid Task + Override}
+
+The routing architecture combines three strategies:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Task-based routing} (default): Each task type has a preferred model class. Administrative tasks route to local models; strategic decisions route to Claude; financial analysis routes to GPT-4o.
+
+  \item \textbf{Per-agent override}: Users can manually pin any agent to any model, overriding the default routing.
+
+  \item \textbf{Senior-agent dynamic routing} (essential, future): The CEO agent observes the CFO's cost reports and dynamically adjusts routing decisions in real time. This is not a menu toggle---it is an \emph{emergent behavior} of the senior agent's cognition.
+\end{enumerate}
+
+\subsection{CFO as Cost Oracle}
+
+The CFO agent (Priya Singh) serves a dual role:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Cost tracking}: Monitors token consumption per agent, per model, per time window. Generates cost projections and budget alerts.
+  \item \textbf{Advisory output}: Produces natural-language cost recommendations that the CEO agent consumes as decision inputs. Example: ``Claude Sonnet costs $3\times$ more per token than Haiku. Recommend downgrading Admin to Haiku for scheduling tasks.''
+\end{itemize}
+
+\subsection{Demo Mode}
+
+When no API keys are configured, agents cycle through curated pre-written responses that simulate realistic LLM output. This ensures the system is demonstrable without any external dependencies. A badge in the Live mode top bar indicates ``$\lightning$ DEMO'' or ``$\bigkey$ API'' depending on key status.
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Token Efficiency \& OmniCube Integration}
+% ══════════════════════════════════════════════════════════════
+
+Token cost is the primary operational expense of a multi-agent system running continuous LLM calls. SimOffice addresses this through four mechanisms:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Local model fallback}: Route low-complexity tasks to locally-running Llama or Mistral via Ollama, incurring zero API cost.
+
+  \item \textbf{Response length constraints}: System prompts enforce strict word limits (30--50 words), keeping token consumption per call minimal.
+
+  \item \textbf{Call cooldown}: A per-agent minimum interval (4 seconds in v0.3) prevents token waste from rapid-fire calls at high simulation speeds.
+
+  \item \textbf{OmniCube compression} (planned): Integration with LumenHelix's reversible computing compression technology for prompt and context-window compression, reducing token counts at the encoding layer.
+\end{enumerate}
+
+\begin{archbox}[OmniCube Integration Point]
+The OmniCube framework, built on the CORE-32 reversible computation architecture, provides a natural compression layer for agent context windows. By encoding agent memory streams and system prompts through the $\delta_{32}(x) = x \oplus 16$ involution-based compression pipeline, context can be transmitted to LLM providers with reduced token counts while preserving semantic fidelity. This integration is planned for v0.5.
+\end{archbox}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Prefab Environment System}
+% ══════════════════════════════════════════════════════════════
+
+\subsection{Template Architecture}
+
+A prefab environment is a JSON-serializable bundle containing:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Room definition}: Grid dimensions, wall configuration, floor zone map.
+  \item \textbf{Furniture layout}: Array of placed objects with grid positions and configurations.
+  \item \textbf{Agent preset}: Which agents are active, their desk assignments, model overrides.
+  \item \textbf{Task pool overrides}: Domain-specific task definitions (e.g., a law firm's CEO reviews ``case strategy'' instead of ``product roadmap'').
+  \item \textbf{Metadata}: Template name, description, author, version, category tags.
+\end{itemize}
+
+\subsection{Planned Templates}
+
+\begin{multicols}{2}
+\begin{itemize}[leftmargin=1.5em,itemsep=1pt]
+  \item Generic Office (v0.3, shipped)
+  \item Law Firm
+  \item Tech Startup
+  \item Design Studio
+  \item Marketing Agency
+  \item Hedge Fund / Trading Floor
+  \item Home Office (solo)
+  \item Data Center / NOC
+  \item Research Lab
+  \item Customer Service Center
+\end{itemize}
+\end{multicols}
+
+\subsection{Deconstructability \& Remixing}
+
+Every prefab environment is fully deconstructable in Sandbox mode. Users can:
+
+\begin{itemize}[leftmargin=2em]
+  \item Inspect how any agent is configured.
+  \item Rearrange, add, or remove furniture.
+  \item Modify agent roles, model assignments, or task pools.
+  \item Export the modified environment as a new template.
+  \item Share templates with the community.
+\end{itemize}
+
+This creates an \textbf{open-source world-building economy} where expertise is encoded in shareable, forkable environment configs. A user can import ``Corporate Law Firm v2 with paralegal focus'' and adapt it for their own use case.
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Community \& Sharing Layer}
+% ══════════════════════════════════════════════════════════════
+
+The community layer (planned for v0.4+) enables:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Template marketplace}: Browse, search, and install community-created environment templates.
+  \item \textbf{Component sharing}: Individual furniture items, agent configurations, and task pools can be shared independently of full environments.
+  \item \textbf{Scenario replays}: Export a completed simulation run as a shareable replay. Others can watch how your configured agents handled a scenario, then fork and modify the setup.
+  \item \textbf{Versioning}: Templates support semantic versioning. Forked templates maintain provenance links to their parent.
+\end{enumerate}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Technology Stack}
+% ══════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Layer} & \textbf{Technology} & \textbf{Status} \\
+\midrule
+Rendering       & Raw HTML5 Canvas 2D, HiDPI-aware, no framework dependency          & Shipped (v0.3) \\
+UI Framework    & Vanilla HTML/CSS/JS with Google Fonts (VT323 + Outfit)              & Shipped (v0.3) \\
+Agent Backend   & Multi-provider LLM client (fetch-based, browser-native)            & Shipped (v0.3) \\
+Local Inference & Ollama (llama3.2, mistral) via localhost:11434                      & Shipped (v0.3) \\
+Persistence     & localStorage for API keys; JSON export/import for office configs   & Partial (v0.3) \\
+Compression     & OmniCube / CORE-32 token compression layer                         & Planned (v0.5) \\
+Community       & GitHub-based template sharing; future: hosted marketplace           & Planned (v0.4) \\
+Mobile          & PWA wrapper with responsive canvas scaling                          & Planned (v0.6) \\
+\bottomrule
+\end{tabularx}
+\caption{Technology stack by architectural layer.}
+\end{table}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Development Roadmap}
+% ══════════════════════════════════════════════════════════════
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Version} & \textbf{Milestone} & \textbf{Deliverables} \\
+\midrule
+v0.1 & Environment Foundation   & Isometric room, furniture palette, drag-and-drop, sandbox/live modes \\
+v0.2 & LLM Integration          & Real API calls per agent, demo mode, speech bubbles, task feed, settings \\
+v0.3 & Visual Polish             & Canvas2D rewrite, gradient shading, shadows, glow effects, ambient animation \\
+\midrule
+v0.4 & Community Sharing         & JSON export/import, GitHub template repo, template browser \\
+v0.5 & OmniCube Compression      & Token compression integration, CFO real-time cost dashboard \\
+v0.6 & Senior Agent Router       & CEO dynamic routing logic, CFO advisory consumption, emergent cost optimization \\
+v0.7 & Memory Streams            & Per-agent long-term memory, reflection architecture, inter-agent awareness \\
+v0.8 & Multiple Environments     & Multi-room offices, building-level navigation, department isolation \\
+v0.9 & Additional Prefabs        & Law Firm, Tech Startup, Design Studio templates with domain-specific agents \\
+v1.0 & Production Release        & Hosted platform, user accounts, template marketplace, mobile PWA \\
+\bottomrule
+\end{tabularx}
+\caption{Development roadmap from prototype to production.}
+\end{table}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Prior Art \& Related Work}
+% ══════════════════════════════════════════════════════════════
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Generative Agents} (Park et al., Stanford/Google, 2023): 25 LLM-powered agents in a pixel-art sandbox with memory streams and reflection. Foundational reference architecture for SimOffice's agent cognition layer.
+
+  \item \textbf{AgentCraft} (2025--2026): RTS-style interface for AI agent orchestration. Demonstrated that game interfaces reduce cognitive load for agent management. SimOffice differs in its workplace/social focus versus AgentCraft's command-and-control orientation.
+
+  \item \textbf{Mesa} (Python): Academic agent-based modeling framework. Strong simulation capabilities but no visual interface or LLM integration.
+
+  \item \textbf{AnyLogic}: Commercial multi-method simulation platform. Enterprise-grade but lacks the game-like accessibility and community sharing model.
+
+  \item \textbf{SIMA / Genie 2} (Google DeepMind): Generalist AI agents for 3D virtual worlds and procedural world generation. Relevant for future procedural environment generation but operates at a different abstraction level.
+
+  \item \textbf{FreeSims / OpenTS2}: Open-source Sims engine recreations. Potential asset pipeline or interaction-model references, though they require original game files.
+
+  \item \textbf{Carnage3D}: Open-source GTA 1 reimplementation. Reference for isometric rendering and 2D character movement in a city-scale environment.
+\end{itemize}
+
+
+% ══════════════════════════════════════════════════════════════
+\section{Conclusion}
+% ══════════════════════════════════════════════════════════════
+
+SimOffice occupies a unique position in the AI agent tooling landscape: it is neither a dry enterprise platform nor an academic simulation framework, but a \emph{game-inspired workspace} that makes agent behavior visible, interactive, and shareable. By borrowing proven interaction paradigms from The Sims (character creation, build/live duality), GTA (isometric spatial awareness), and StarCraft (unit spawning, building-as-capability), SimOffice transforms agent orchestration from a backend engineering problem into a visual, intuitive, and collaborative experience.
+
+The v0.3 prototype demonstrates the core loop: onboard, build, activate, watch, iterate. The path from here to production runs through community sharing, OmniCube token compression, senior-agent emergent routing, and a growing library of domain-specific environment templates---each deconstructable, each remixable, each a building block in an open ecosystem of AI-powered workspaces.
+
+\vspace{1em}
+\begin{center}
+\textcolor{accent}{\rule{0.4\textwidth}{0.5pt}}\\[8pt]
+{\small\textcolor{muted}{SimOffice is a LumenHelix Solutions project.\\
+Christopher Gordon Phillips · \texttt{chris@oiq.to} · \texttt{lumenhelix.com}}}
+\end{center}
+
+\end{document}
