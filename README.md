@@ -1,7 +1,11 @@
 # simOFFICE-ai
 
 <p align="center">
-  <img src="docs/assets/logo.svg" alt="simOFFICE-ai logo" width="160">
+  <img src="docs/assets/hero.svg" alt="simOFFICE-ai header" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/assets/logo.svg" alt="simOFFICE-ai logo" width="120">
 </p>
 
 <h3 align="center">Give agents a floor. Not a chat thread.</h3>
@@ -9,9 +13,9 @@
 <p align="center">A 3D command center for managing AI agent teams and tool-enabled office stations.</p>
 
 <p align="center">
-  <a href="https://lumenhelixsolutions.github.io/simOFFICE-ai/">Launch Page</a>
+  <a href="https://lumenhelixlab.github.io/simOFFICE-ai/">Launch Page</a>
   <span> · </span>
-  <a href="https://github.com/lumenhelixsolutions/simOFFICE-ai">GitHub</a>
+  <a href="https://github.com/lumenhelixlab/simOFFICE-ai">GitHub</a>
   <span> · </span>
   <a href="https://lumenhelix.com">LumenHelix</a>
 </p>
@@ -31,9 +35,9 @@ SimOffice is a 3D command center for AI agent teams. Instead of burying agents i
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/lumenhelixsolutions/simOFFICE-ai.git
+git clone https://github.com/lumenhelixlab/simOFFICE-ai.git
 cd simOFFICE-ai
-git clone https://github.com/lumenhelixsolutions/simOFFICE-ai.git
+git clone https://github.com/LumenHelixLab/simOFFICE-ai.git
 cd simOFFICE-ai
 # Terminal 1: backend
 cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cp .env.example .env && .venv/bin/uvicorn main:app --reload --host 0.0.0.0 --port 8080
@@ -44,9 +48,9 @@ cd client && npm install && npm run dev
 ### Windows (PowerShell)
 
 ```powershell
-git clone https://github.com/lumenhelixsolutions/simOFFICE-ai.git
+git clone https://github.com/lumenhelixlab/simOFFICE-ai.git
 Set-Location simOFFICE-ai
-git clone https://github.com/lumenhelixsolutions/simOFFICE-ai.git
+git clone https://github.com/LumenHelixLab/simOFFICE-ai.git
 Set-Location simOFFICE-ai
 # Terminal 1: backend
 cd backend; python -m venv .venv; .venv\Scripts\pip install -r requirements.txt; copy .env.example .env; .venv\Scripts\uvicorn main:app --reload --host 0.0.0.0 --port 8080
@@ -57,9 +61,9 @@ cd client; npm install; npm run dev
 ### Windows (Git Bash / WSL)
 
 ```bash
-git clone https://github.com/lumenhelixsolutions/simOFFICE-ai.git
+git clone https://github.com/lumenhelixlab/simOFFICE-ai.git
 cd simOFFICE-ai
-git clone https://github.com/lumenhelixsolutions/simOFFICE-ai.git
+git clone https://github.com/LumenHelixLab/simOFFICE-ai.git
 cd simOFFICE-ai
 # Terminal 1: backend
 cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cp .env.example .env && .venv/bin/uvicorn main:app --reload --host 0.0.0.0 --port 8080
